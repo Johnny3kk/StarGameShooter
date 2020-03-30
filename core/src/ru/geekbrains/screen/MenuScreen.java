@@ -3,27 +3,31 @@ package ru.geekbrains.screen;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.math.Vector2;
 
 import ru.geekbrains.base.BaseScreen;
 import ru.geekbrains.exception.GameException;
 import ru.geekbrains.math.Rect;
 import ru.geekbrains.sprites.Background;
-import ru.geekbrains.sprites.Logo;
+import ru.geekbrains.sprites.Star;
 
 public class MenuScreen extends BaseScreen {
 
-    private Texture badLogic;
+    private static final int STAR_COUNT = 256;
+
     private Texture bg;
     private Background background;
 
-    private Logo logo;
+    private TextureAtlas atlas;
+
+    private Star[] stars;
 
     @Override
     public void show() {
         super.show();
         bg = new Texture("textures/bg.png");
-        badLogic = new Texture("badlogic.jpg");
+        atlas = new TextureAtlas(Gdx.files.internal("textures/menuAtlas.tpack"));
         initSprites();
     }
 
@@ -37,33 +41,39 @@ public class MenuScreen extends BaseScreen {
     public void dispose() {
         batch.dispose();
         bg.dispose();
-        badLogic.dispose();
+        atlas.dispose();
         super.dispose();
     }
 
     @Override
     public void resize(Rect worldBounds) {
         background.resize(worldBounds);
-        logo.resize(worldBounds);
+        for (Star star : stars) {
+            star.resize(worldBounds);
+        }
     }
 
     @Override
     public boolean touchDown(Vector2 touch, int pointer, int button) {
-        logo.touchDown(touch, pointer, button);
         return false;
     }
 
     private void initSprites() {
         try {
             background = new Background(bg);
-            logo = new Logo(badLogic);
+            stars = new Star[STAR_COUNT];
+            for (int i = 0; i < STAR_COUNT; i++) {
+                stars[i] =  new Star(atlas);
+            }
         } catch (GameException e) {
             throw new RuntimeException(e);
         }
     }
 
     private void update(float delta) {
-        logo.update(delta);
+        for (Star star : stars) {
+            star.update(delta);
+        }
     }
 
     private void draw() {
@@ -71,7 +81,9 @@ public class MenuScreen extends BaseScreen {
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         batch.begin();
         background.draw(batch);
-        logo.draw(batch);
+        for (Star star : stars) {
+            star.draw(batch);
+        }
         batch.end();
     }
 
