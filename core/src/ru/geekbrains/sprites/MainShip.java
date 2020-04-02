@@ -2,11 +2,13 @@ package ru.geekbrains.sprites;
 
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 
 import ru.geekbrains.base.Sprite;
 import ru.geekbrains.exception.GameException;
 import ru.geekbrains.math.Rect;
+import ru.geekbrains.pool.BulletPool;
 
 public class MainShip extends Sprite {
 
@@ -15,6 +17,9 @@ public class MainShip extends Sprite {
     private static final int INVALID_POINTER = -1;
 
     private Rect worldBounds;
+    private BulletPool bulletPool;
+    private TextureRegion bulletRegion;
+    private Vector2 bulletV;
 
     private final Vector2 v0;
     private final Vector2 v;
@@ -25,8 +30,11 @@ public class MainShip extends Sprite {
     private int leftPointer = INVALID_POINTER;
     private int rightPointer = INVALID_POINTER;
 
-    public MainShip(TextureAtlas atlas) throws GameException {
+    public MainShip(TextureAtlas atlas, BulletPool bulletPool) throws GameException {
         super(atlas.findRegion("main_ship"), 1, 2, 2);
+        this.bulletPool = bulletPool;
+        bulletRegion = atlas.findRegion("bulletMainShip");
+        bulletV = new Vector2(0, 0.5f);
         v0 = new Vector2(0.5f, 0);
         v = new Vector2();
     }
@@ -101,6 +109,8 @@ public class MainShip extends Sprite {
                 pressedRight = true;
                 moveRight();
                 break;
+            case Input.Keys.UP:
+                shoot();
         }
         return false;
     }
@@ -127,6 +137,11 @@ public class MainShip extends Sprite {
                 break;
         }
         return false;
+    }
+
+    public void shoot() {
+        Bullet bullet = bulletPool.obtain();
+        bullet.set(this, bulletRegion, pos, bulletV, 0.01f, worldBounds, 1);
     }
 
     private void moveRight() {
