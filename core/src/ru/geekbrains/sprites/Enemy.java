@@ -10,17 +10,24 @@ import ru.geekbrains.pool.BulletPool;
 
 public class Enemy extends Ship {
 
+    private final Vector2 descentV;
+
     public Enemy(BulletPool bulletPool, Rect worldBounds) {
         this.bulletPool = bulletPool;
         this.worldBounds = worldBounds;
         v = new Vector2();
         v0 = new Vector2();
         bulletV = new Vector2();
+        descentV = new Vector2(0, -0.3f);
     }
 
     @Override
     public void update(float delta) {
         super.update(delta);
+        if (getTop() <= worldBounds.getTop()) {
+            v.set(v0);
+            autoShoot(delta);
+        }
         if (getBottom() <= worldBounds.getBottom()) {
             destroy();
         }
@@ -48,7 +55,14 @@ public class Enemy extends Ship {
         this.reloadTimer = reloadInterval;
         this.shootSound = shootSound;
         this.hp = hp;
-        this.v.set(v0);
+        this.v.set(descentV);
         setHeightProportion(height);
+    }
+
+    public boolean isBulletCollision(Rect bullet) {
+        return !(bullet.getRight() < getLeft()
+                || bullet.getLeft() > getRight()
+                || bullet.getBottom() > getTop()
+                || bullet.getTop() < pos.y);
     }
 }
